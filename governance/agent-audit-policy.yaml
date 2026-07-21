@@ -1,0 +1,152 @@
+id: dea:policy-agent-audit
+name: Agent Audit Policy
+version: "1.0.0"
+status: active
+description: >
+  Mandatory audit policy for all production agents operating within the TechNeHub
+  Labs agent platform. This policy defines the required fields, retention periods,
+  and compliance requirements for agent audit logs.
+
+policy_statements:
+  statement_1:
+    title: Immutable Audit Event Requirement
+    requirement: >
+      Every production agent must emit an immutable audit event for every action
+      taken. An action is defined as any invocation of a tool, a decision point
+      where the agent's reasoning changes direction, a human interaction, or an
+      external system call.
+
+  statement_2:
+    title: Mandatory Audit Fields
+    requirement: >
+      Every audit event MUST contain the following fields:
+      - agent_id: Unique identifier of the agent that performed the action
+      - session_id: Identifier linking all events within a single agent session
+      - timestamp: ISO 8601 UTC timestamp with millisecond precision
+      - action_type: Enumerated type of action (tool_call, reasoning_step, human_input, external_call, escalation)
+      - target_resource: Identifier of the resource acted upon (tool name, document ID, API endpoint, etc.)
+      - outcome: Enumerated outcome (success, failure, partial, escalated)
+      - correlation_id: Groups related events across distributed agent sessions
+
+  statement_3:
+    title: PII Prohibition
+    requirement: >
+      Audit events must not contain personally identifiable information (PII)
+      in plain text. All identifiers referencing human users must use opaque
+      reference IDs (e.g., user_abc123, not email addresses or names). Any field
+      that might contain PII must be hashed or reference-linked, never plaintext.
+
+  statement_4:
+    title: Audit Log Integrity
+    requirement: >
+      Audit logs must be written to an immutable, append-only store. Agents must
+      not have write access to their own audit logs. Audit logs must be signed
+      by the audit logging service with a tamper-evident mechanism (e.g., hash chain
+      or cryptographic anchoring).
+
+  statement_5:
+    title: Retention Period
+    requirement: >
+      Audit logs must be retained for a minimum period based on environment:
+      - Standard environments: 1 year rolling retention
+      - Regulated environments (financial, healthcare, government): 7 years minimum
+      - Litigation hold: indefinite retention until hold is explicitly released
+      Retention applies to all environments; logs must not be deleted before
+      their retention period expires.
+
+  statement_6:
+    title: Real-Time Alerting
+    requirement: >
+      The audit system must provide real-time alerting on the following event types:
+      - Escalation events (agent requesting human review)
+      - Failure events with high severity
+      - Security-relevant events (prompt injection suspected, tool misuse detected)
+      - Agent behaviour anomalies (unusually high action rates, unusual tool call patterns)
+
+audit_event_schema:
+  version: "1.0"
+  fields:
+    - name: event_id
+      type: string
+      required: true
+      description: Globally unique event identifier (UUID v4)
+    - name: agent_id
+      type: string
+      required: true
+      description: Unique agent identifier
+    - name: session_id
+      type: string
+      required: true
+      description: Session identifier linking related events
+    - name: timestamp
+      type: datetime
+      required: true
+      description: ISO 8601 UTC timestamp
+    - name: action_type
+      type: enum
+      required: true
+      enum_values:
+        - tool_call
+        - reasoning_step
+        - human_input
+        - external_call
+        - escalation
+        - guardrail_triggered
+        - rollback
+    - name: target_resource
+      type: string
+      required: true
+      description: Resource acted upon
+    - name: outcome
+      type: enum
+      required: true
+      enum_values:
+        - success
+        - failure
+        - partial
+        - escalated
+    - name: correlation_id
+      type: string
+      required: false
+      description: Groups related events across distributed sessions
+    - name: metadata
+      type: object
+      required: false
+      description: Additional event-specific data
+    - name: reasoning_trace
+      type: string
+      required: false
+      description: Optional reasoning trace excerpt for reasoning_step events
+
+compliance_mapping:
+  SOC2:
+    control: CC7.2 — Monitoring of system components
+    mapping: All agent actions logged with required fields enables continuous monitoring
+  ISO27001:
+    control: A.12.4 — Logging and monitoring
+    mapping: Audit log requirements satisfy logging control obligations
+  GDPR:
+    control: Article 30 — Records of processing activities
+    mapping: Agent audit logs constitute processing records; PII prohibition enforced
+  HIPAA:
+    control: §164.312(b) — Audit controls
+    mapping: Immutable audit logs with retention meet audit control requirements
+
+enforcement:
+  mechanism: Audit log completeness and PII compliance validated at ingestion time
+  failure_response: Events failing validation rejected and logged to a separate
+    remediation queue; agent session flagged for review
+  periodic_audit: Monthly automated review of sample audit logs for policy compliance
+
+relationships:
+  - source_id: dea:policy-agent-audit
+    target_id: dea:agent-platform-standard
+    relationship_type: required_by
+  - source_id: dea:policy-agent-audit
+    target_id: dea:agent-guardrails
+    relationship_type: informs
+tags:
+  - governance
+  - policy
+  - audit
+  - compliance

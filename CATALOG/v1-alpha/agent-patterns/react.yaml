@@ -1,0 +1,49 @@
+id: dea:agent-pattern-react
+type: SolutionComponent
+name: ReAct Agent Pattern
+abbreviation: ReAct
+version: "1.0.0"
+status: active
+description: >
+  Reasoning + Acting pattern where the agent interleaves thought steps (Reasoning)
+  with actions (Acting) against an external environment, observing results to inform
+  the next reasoning cycle. Suitable for tool-use and RAG tasks.
+pattern_type: single-agent
+cognitive_architecture:
+  reasoning: ReAct (Reasoning + Acting)
+  memory: Short-term (turn context) + Long-term (vector store)
+  planning: None (reactive to observation)
+  tools: Required (function calling interface)
+strengths:
+  - Transparent reasoning trace
+  - Effective for tool-use tasks
+  - Simple to implement
+  - Well-suited for RAG
+weaknesses:
+  - Limited long-horizon planning
+  - Reasoning token overhead
+  - Brittle on ambiguous tasks
+use_cases:
+  - Document Q&A with tool access
+  - Database query synthesis
+  - Multi-step API orchestration
+antipatterns:
+  - Long-horizon planning tasks
+  - Tasks requiring global context
+  - High-cost multi-step reasoning
+technology_stack:
+  - LLM: GPT-4 or Claude 3+ with function calling
+  - Vector store: Pinecone / Weaviate / Chroma
+  - Framework: LangChain / LlamaIndex
+relationships:
+  - source_id: dea:agent-pattern-react
+    target_id: dea:principle-observable
+    relationship_type: implements
+  - source_id: dea:agent-pattern-react
+    target_id: dea:pattern-cqrs
+    relationship_type: complements
+tags:
+  - agent-pattern
+  - single-agent
+  - reasoning
+  - tool-use

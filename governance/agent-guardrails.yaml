@@ -1,0 +1,163 @@
+id: dea:policy-agent-guardrails
+name: Agent Guardrails Policy
+version: "1.0.0"
+status: active
+description: >
+  Mandatory guardrail specifications for all production agents operating within the
+  TechNeHub Labs agent platform. Guardrails are runtime controls that prevent
+  undesirable agent behaviour, protect users and the platform, and ensure
+  compliance with enterprise policies.
+
+guardrail_categories:
+  input_validation:
+    description: Pre-processing controls applied to user prompts before agent consumption
+    required_controls:
+      - control: Prompt Injection Detection
+        description: >
+          Scan user prompts for known injection patterns including:
+          - System prompt override attempts (e.g., ignore previous instructions)
+          - Delimiter injection (###, ---, XML tags used to redefine role)
+          - Role playing attacks designed to circumvent content policies
+          - Base64 or encoded instruction injection
+        detection_method: Pattern matching + ML-based classifier ensemble
+        threshold: Block if confidence > 0.85; escalate to human review if confidence > 0.6
+        action_on_detect: Prompt replaced with safe placeholder; event logged; user notified
+      - control: Sensitive Data Detection
+        description: >
+          Detect and redact sensitive data categories from prompts before processing:
+          - Credit card numbers, bank account details
+          - Social security numbers and national IDs
+          - API keys and credentials
+          - Health information (PHI)
+          - passwords
+        action_on_detect: Field redacted and replaced with [REDACTED] placeholder; incident logged
+      - control: Prompt Length Limit
+        description: Enforce maximum prompt length to prevent resource exhaustion
+        limit: Configurable per agent type; default 32,000 tokens
+        action_on_detect: Truncate to limit with suffix indicator; log truncation event
+
+  output_filtering:
+    description: Post-processing controls applied to agent outputs before user delivery
+    required_controls:
+      - control: Content Classification
+        description: >
+          All agent outputs pass through a content classifier before delivery.
+          Classifier detects: harmful content, PII leakage, disallowed content,
+          confidential data, and content violating usage policies.
+        classification_categories:
+          - safe: Delivered to user without modification
+          - needs_review: Delivered with [AI GENERATED — VERIFY] prefix; logged for human review
+          - blocked: Not delivered; user receives error; event logged
+          - modified: Content modified by filter; delivered with [CONTENT MODIFIED] prefix
+        confidence_thresholds:
+          safe: < 0.3 risk score
+          needs_review: 0.3–0.7 risk score
+          blocked: "> 0.7 risk score"
+      - control: PII Leakage Prevention
+        description: >
+          Detect and redact any PII appearing in agent outputs that was not
+          intentionally provided by the user. Includes: names, emails, phone numbers,
+          addresses appearing in generated content.
+        action_on_detect: PII redacted with [PII REMOVED]; logged; delivered to user
+      - control: Output Length Enforcement
+        description: Enforce maximum output length to prevent resource issues
+        limit: Configurable; default 8,000 tokens
+        action_on_detect: Truncated with [OUTPUT TRUNCATED] suffix
+
+  resource_limits:
+    description: Runtime resource constraints enforced per agent instance
+    required_limits:
+      - limit: Per-Agent Token Budget
+        scope: Total tokens (input + output) consumed per session
+        default: 128,000 tokens
+        enforcement: Hard stop — agent session terminated when budget exhausted
+        escalation: Budget exhaustion event logged; caller notified; rollback if mid-action
+      - limit: Per-Agent Tool Call Budget
+        scope: Maximum tool calls per session
+        default: 50 tool calls
+        enforcement: Hard stop — no further tool calls accepted
+        escalation: Logged and alerted; agent may attempt to respond with accumulated context
+      - limit: Per-Agent Session Duration
+        scope: Maximum wall-clock time from session start to end
+        default: 30 minutes
+        enforcement: Session terminated at limit
+        escalation: Graceful termination attempted; state snapshot saved for resume
+      - limit: Per-Agent Memory Limit
+        scope: RAM allocated to agent process
+        default: 2GB recommended, 512MB minimum
+        enforcement: OOM kill by container orchestrator
+        escalation: Snapshot taken before kill; rollback to last snapshot triggered
+
+  escalation_criteria:
+    description: Conditions that require human review or intervention
+    mandatory_escalation:
+      - condition: Agent confidence below threshold
+        threshold: Confidence score < 0.6 on final output
+        action: Output flagged for human review before delivery; agent reasoning trace included
+      - condition: Irreversible action requested
+        definition: >
+          Actions classified as irreversible include: DELETE operations, payment
+          or financial transactions, data permanently modified, emails sent,
+          approvals granted for high-value or regulated actions.
+        action: Execution paused; human approval required before proceeding
+      - condition: Agent requests escalation
+        definition: Agent explicitly signals need for human review via escalation event
+        action: Session paused; human reviewer notified with full context
+      - condition: Content classified as blocked
+        action: Output not delivered; human review initiated; incident created
+      - condition: Repeated guardrail violations
+        threshold: Same guardrail triggered 3+ times in a session
+        action: Session suspended; platform engineering notified; human review initiated
+
+  behavioural_anomaly_detection:
+    description: Runtime detection of unusual agent behaviour patterns
+    monitored_patterns:
+      - pattern: Repetitive Action Loop
+        description: Same tool called with same arguments 5+ times consecutively
+        detection: Action history analysis within session
+        action: Rollback to last decision point; re-plan with loop avoidance
+      - pattern: Rapid Action Burst
+        description: "\" > 10 tool calls within a 60-second window without user interaction\""
+        detection: Token bucket rate monitoring
+        action: Throttle agent; audit event; human review if burst recurs
+      - pattern: Unusual Tool Access Pattern
+        description: Agent accessing tools not typical for its declared role or pattern
+        detection: Tool access profile baseline per agent type; deviation detection
+        action: Tool call blocked; event logged; agent notified of policy violation
+      - pattern: Context Window Exhaustion Pattern
+        description: Repeated near-exhaustion of context window followed by summary attempts
+        detection: Token usage monitoring
+        action: Suggestion to caller to simplify task; escalation if pattern persists
+
+governance_integration:
+  guardrail_events:
+    - Every guardrail trigger emits an audit event with type=guardrail_triggered
+    - Guardrail metrics exposed to platform monitoring dashboards
+    - Weekly guardrail report generated for platform governance team
+
+  configuration_management:
+    - Guardrail thresholds are configurable per agent type and deployment environment
+    - Changes to guardrail configurations require governance team approval
+    - Configurations versioned and auditable
+
+  exception_process:
+    - Temporary guardrail bypasses require documented justification and time limit
+    - Emergency bypasses must be approved by security team within 24 hours
+    - All bypasses logged and reviewed in monthly governance meeting
+
+relationships:
+  - source_id: dea:policy-agent-guardrails
+    target_id: dea:agent-platform-standard
+    relationship_type: required_by
+  - source_id: dea:policy-agent-guardrails
+    target_id: dea:policy-agent-audit
+    relationship_type: complements
+  - source_id: dea:policy-agent-guardrails
+    target_id: dea:agent-security-boundary
+    relationship_type: enforces
+tags:
+  - governance
+  - policy
+  - guardrails
+  - safety
+  - security

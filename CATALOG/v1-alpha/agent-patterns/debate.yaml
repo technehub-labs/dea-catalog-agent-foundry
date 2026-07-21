@@ -1,0 +1,53 @@
+id: dea:agent-pattern-debate
+type: SolutionComponent
+name: Multi-Agent Debate Pattern
+abbreviation: Debate
+version: "1.0.0"
+status: active
+description: >
+  Multi-agent debate pattern where two or more agents adopt opposing positions on a
+  topic and argue their case through structured rounds. An arbiter agent evaluates
+  the arguments and renders a final decision. This pattern is used for adversarial
+  reasoning, thorough exploration of trade-offs, and quality assurance of LLM outputs.
+pattern_type: multi-agent
+cognitive_architecture:
+  reasoning: Adversarial — each debater agent constructs and defends a position; arbiter evaluates
+  memory: Per-agent debate context maintained across rounds; arbiter holds full debate history
+  planning: Debaters plan arguments within their assigned position; arbiter plans evaluation criteria
+  tools: Optional — debaters may use retrieval tools to ground arguments
+strengths:
+  - Forces exploration of opposing viewpoints before decision
+  - Reduces single-agent bias by introducing adversarial checks
+  - Produces transparent, auditable reasoning trails
+  - Effective for quality assurance of high-stakes outputs
+weaknesses:
+  - High token cost due to multiple agents and multiple rounds
+  - Can converge on moderate rather than optimal positions (devil's advantage)
+  - Requires well-defined judging criteria for arbiter
+  - Slower than single-agent approaches
+use_cases:
+  - Architectural decision reviews with competing trade-off arguments
+  - Risk assessment with opposing risk/benefit agent perspectives
+  - Policy review and compliance checking
+  - Code review with proponent and skeptic agents
+antipatterns:
+  - Tasks requiring fast, real-time responses
+  - Low-stakes decisions where multi-agent overhead is unjustified
+  - Topics where ground truth is known and debate adds no value
+technology_stack:
+  - LLM: GPT-4 or Claude 3+ with function calling for all agents
+  - Debater agents: 2–N specialist position agents
+  - Arbiter agent: impartial evaluation agent with structured output
+  - Framework: custom multi-agent orchestration or LangChain
+relationships:
+  - source_id: dea:agent-pattern-debate
+    target_id: dea:principle-observable
+    relationship_type: implements
+  - source_id: dea:agent-pattern-debate
+    target_id: dea:agent-pattern-react
+    relationship_type: contrasts
+tags:
+  - agent-pattern
+  - multi-agent
+  - adversarial
+  - debate

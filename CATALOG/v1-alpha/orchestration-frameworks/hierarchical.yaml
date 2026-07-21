@@ -1,0 +1,104 @@
+id: dea:orchestration-hierarchical
+name: Hierarchical Orchestration Framework
+version: "1.0.0"
+status: active
+description: >
+  Hierarchical orchestration pattern where a top-level orchestrator decomposes
+  high-level goals into sub-tasks and assigns them to specialist agents. The
+  orchestrator maintains global context and coordinates execution across workers,
+  collecting results and synthesising final outputs. This is the foundational
+  pattern for multi-agent enterprise workflows.
+
+orchestration_model:
+  type: hierarchical
+  levels:
+    - level: 1
+      role: Orchestrator
+      description: Top-level goal decomposition and task routing
+      agent_type: Generalist planner with broad tool access
+    - level: 2
+      role: Specialist Agent
+      description: Executes scoped tasks within a specific domain
+      agent_type: Domain-specific with targeted tool registry
+    - level: 3
+      role: Utility Agent
+      description: Atomic operations, data retrieval, formatting
+      agent_type: Minimal with single-purpose tools
+
+coordination_mechanism:
+  task_decomposition:
+    method: Explicit planning — orchestrator produces a task tree before execution
+    decomposition_criteria:
+      - Functional domain boundaries
+      - Parallelisable sub-tasks
+      - Data dependencies between sub-tasks
+      - Trust and permission boundaries
+    output: Structured task tree with ordering constraints
+
+  routing_logic:
+    method: Rule-based routing with LLM-assisted task classification
+    routing_criteria:
+      - Task domain matching to specialist agent capabilities
+      - Agent availability and current load
+      - Task urgency and priority
+      - Data residency and compliance requirements
+    fallback: Default to orchestrator handling task directly if no suitable specialist
+
+  result_aggregation:
+    method: Orchestrator collects worker results and synthesises final output
+    aggregation_strategies:
+      - Sequential: results assembled in dependency order
+      - Parallel: independent results merged
+      - Hierarchical: sub-orchestrators aggregate at their level before passing up
+    error_handling: Partial results acceptable with error reporting
+
+agent_contracts:
+  orchestrator_contract:
+    responsibilities:
+      - Goal decomposition and task planning
+      - Task routing to appropriate specialists
+      - Result aggregation and synthesis
+      - Handling unanticipated errors or edge cases
+      - Maintaining audit trail of all sub-task executions
+    permissions:
+      - May invoke any registered specialist agent
+      - May access all tool registries for routing decisions
+      - May not directly modify worker agent configurations
+
+  specialist_agent_contract:
+    responsibilities:
+      - Execute assigned sub-tasks within their domain
+      - Return structured results to orchestrator
+      - Report failures with context for potential retry or escalation
+      - Maintain local audit log of actions taken
+    permissions:
+      - May only use tools within their declared tool registry
+      - May not invoke other specialist agents directly
+      - May not access data outside their designated domain scope
+
+communication_pattern:
+  message_types:
+    - task_dispatch: Orchestrator to specialist — task description, context, constraints
+    - task_result: Specialist to orchestrator — result, status, metadata
+    - task_error: Specialist to orchestrator — error type, context, retry suggestion
+    - escalation: Specialist or orchestrator to human reviewer — requires intervention
+    - heartbeat: Specialist to orchestrator — liveness check during long-running tasks
+
+technology_stack:
+  - Message bus: Apache Kafka / AWS SQS / Azure Service Bus
+  - Agent framework: LangChain multi-agent / custom implementation
+  - Service mesh: Istio / Linkerd for mTLS between agents
+  - Monitoring: Prometheus + Grafana for orchestration visibility
+
+relationships:
+  - source_id: dea:orchestration-hierarchical
+    target_id: dea:agent-pattern-supervisor-worker
+    relationship_type: implements
+  - source_id: dea:orchestration-hierarchical
+    target_id: dea:agent-platform-standard
+    relationship_type: requires
+tags:
+  - orchestration
+  - hierarchical
+  - multi-agent
+  - framework

@@ -1,0 +1,99 @@
+id: dea:orchestration-market-based
+name: Market-Based Orchestration Framework
+version: "1.0.0"
+status: active
+description: >
+  Market-based orchestration pattern where tasks are "posted" to an internal agent
+  marketplace and specialist agents bid on or claim tasks based on their capabilities,
+  current load, and declared prices. A market coordinator matches tasks to the most
+  suitable agent(s) based on bid criteria. This pattern is useful for load balancing,
+  resource optimisation, and decentralised task distribution.
+
+orchestration_model:
+  type: market-based
+  components:
+    - component: Task Marketplace
+      description: Central registry where tasks are posted with required capabilities and constraints
+    - component: Agent Registry
+      description: Registry of available agents with their capabilities, current load, and bid prices
+    - component: Market Coordinator
+      description: Matches posted tasks to suitable agents based on bid evaluation
+    - component: Settlement Engine
+      description: Tracks task completion, validates outputs, and resolves disputes
+
+task_lifecycle:
+  posting:
+    requirements: Task description, required capabilities, time constraints, maximum bid price
+    pricing_models:
+      - Fixed price: task pays a set amount upon completion
+      - Auction: agent with lowest compliant bid wins
+      - Priority auction: highest priority task wins regardless of price
+    quality_requirements: Minimum accuracy threshold, required certifications or compliance tags
+
+  bidding:
+    bid_conditions:
+      - Agent must declare all capabilities relevant to the task
+      - Agent must declare any conflicts of interest
+      - Agent must indicate availability and estimated completion time
+      - Agent must pass compliance and security gate checks
+    evaluation_criteria:
+      - Price (lower is better)
+      - Capability match score (higher is better)
+      - Historical performance on similar tasks (higher is better)
+      - Current load / availability (lower load is better)
+      - Compliance and security clearance (must pass minimum threshold)
+
+  matching:
+    strategy: Weighted scoring across evaluation criteria
+    weights:
+      - Capability match: 0.35
+      - Historical performance: 0.25
+      - Price: 0.20
+      - Availability: 0.10
+      - Compliance: 0.10
+    tie_breaking: Prefer agent with better historical performance on similar tasks
+
+  settlement:
+    completion_validation: Output must pass quality gates before payment is released
+    dispute_resolution: Coordinator arbitrates disputes; escalation to human review for unresolved cases
+    partial_credit: Partial payment for partially completed tasks at coordinator's discretion
+
+agent_contracts:
+  marketplace_participant_contract:
+    capabilities_declaration: Agents must accurately declare all capabilities; misdeclaration is a policy violation
+    availability_management: Agents must update availability in real-time
+    bid_integrity: Agents must bid honestly; shill bidding or bid manipulation is prohibited
+    output_quality: Agents must meet declared quality commitments or face reputation penalty
+    audit_compliance: All bids and task completions logged to immutable audit trail
+
+  coordinator_contract:
+    fairness: Coordinator must evaluate all bids using the same criteria
+    transparency: Evaluation criteria and weights must be published to all agents
+    non_discrimination: Coordinator must not favour specific agents without documented justification
+    audit_trail: All matching decisions must be logged with full rationale
+
+use_cases:
+  - Distributed data processing pipelines with heterogeneous agents
+  - Load-balanced customer interaction handling across specialist agents
+  - Multi-tenant SaaS agent platforms with usage-based allocation
+  - Research and analytics workloads with varying urgency and cost sensitivity
+
+technology_stack:
+  - Marketplace backend: Custom microservices or Camunda workflow engine
+  - Message bus: Apache Kafka for task dispatch and bid notifications
+  - Registry: etcd or Consul for agent capability and availability registry
+  - Monitoring: Prometheus + Grafana for marketplace metrics (bid rates, match rates, settlement times)
+
+relationships:
+  - source_id: dea:orchestration-market-based
+    target_id: dea:agent-platform-standard
+    relationship_type: requires
+  - source_id: dea:orchestration-market-based
+    target_id: dea:pattern-cqrs
+    relationship_type: implements
+tags:
+  - orchestration
+  - market-based
+  - multi-agent
+  - framework
+  - decentralised

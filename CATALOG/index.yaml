@@ -1,0 +1,11 @@
+catalog:
+  name: Agent Foundry
+  version: "1.0.0"
+  layer: L1
+  description: >
+    Agent Foundry is the L1 reference catalog for autonomous and semi-autonomous
+    AI agents in the enterprise context. It provides enterprise architects and AI
+    platform teams with agent patterns, platform specifications, orchestration
+    frameworks, and operational governance policies.
+  version_index:
+    - v1-alpha

@@ -1,0 +1,167 @@
+id: dea:viewpoints-stakeholder
+name: Agent Foundry Stakeholder Viewpoints
+version: "1.0.0"
+status: active
+description: >
+  Defines viewpoints for key stakeholders who interact with or govern the Agent Foundry
+  catalog. Each viewpoint identifies the stakeholder's primary concerns, the information
+  elements relevant to them, and the view of the catalog that addresses their needs.
+
+viewpoints:
+  CTO:
+    stakeholder: Chief Technology Officer
+    role: >
+      The CTO is accountable for the overall risk, cost, and strategic value of
+      agent deployments across the enterprise. They need to understand governance
+      posture, compliance exposure, and platform maturity.
+    primary_concerns:
+      - Agent governance risk and exposure
+      - Compliance with regulated industry requirements (GDPR, HIPAA, SOC 2)
+      - Total cost of ownership for agent platform
+      - Strategic alignment of agent investments with business objectives
+      - Vendor lock-in risk and portability
+    relevant_catalog_elements:
+      - Governance policies (audit, rollback, guardrails)
+      - Agent security boundary specifications
+      - Agent platform standards and compliance mappings
+      - Orchestration framework risk profiles
+    information_view: >
+      The CTO views the catalog through a risk and compliance lens. Key metrics
+      include: number of active agents, audit log coverage, rollback success rate,
+      guardrail trigger frequency, and compliance gap count. The CTO is most
+      interested in the governance/ folder and the agent-platform/ specifications.
+    decisions:
+      - Whether to approve deployment of agents in regulated environments
+      - Investment in agent platform infrastructure
+      - Adoption of specific orchestration frameworks based on risk profile
+      - Vendor and technology selection for agent platform components
+    viewpoint_name: Agent Governance Risk View
+
+  ChiefArchitect:
+    stakeholder: Chief Architect
+    role: >
+      The Chief Architect is responsible for the overall technical architecture of
+      the enterprise agent platform. They ensure consistency, interoperability,
+      and adherence to architectural principles across all agent deployments.
+    primary_concerns:
+      - Platform standards and reference architecture compliance
+      - Agent pattern selection guidance for different use cases
+      - Integration patterns between agents and enterprise systems
+      - Security boundary consistency across deployments
+      - Technology lifecycle management for agent platform components
+    relevant_catalog_elements:
+      - Agent platform specifications (runtime, security, memory, tool contracts)
+      - Agent patterns with technology stack recommendations
+      - Orchestration framework technical specifications
+      - Relationships between patterns, principles, and technologies
+    information_view: >
+      The Chief Architect views the catalog through a standards and consistency
+      lens. Key artefacts include: agent platform standard YAML files, the
+      technology_stack sections of each pattern, and the orchestration framework
+      specifications. They care about the CATALOG/v1-alpha/agent-platforms/ folder
+      and the structural consistency of all catalog entries.
+    decisions:
+      - Approval of new agent patterns against platform standards
+      - Technology stack recommendations for new agent deployments
+      - Integration architecture for cross-domain agent workflows
+      - Security boundary exceptions and waivers
+      - Retirement or deprecation of agent patterns or platform components
+    viewpoint_name: Platform Standards View
+
+  SolutionsArchitect:
+    stakeholder: Solutions Architect
+    role: >
+      The Solutions Architect designs specific agent solutions for business problems.
+      They select appropriate agent patterns, design multi-agent workflows, and
+      ensure the solution fits within platform constraints.
+    primary_concerns:
+      - Pattern selection for specific business requirements
+      - Agent and orchestration pattern trade-offs
+      - Mapping business use cases to agent patterns
+      - Estimating complexity and effort for agent implementations
+      - Identifying anti-patterns to avoid
+    relevant_catalog_elements:
+      - Agent pattern YAML files (strengths, weaknesses, use_cases, antipatterns)
+      - Orchestration framework YAML files
+      - Stakeholder viewpoints mapping patterns to roles
+      - Agent platform requirements that constrain design choices
+    information_view: >
+      The Solutions Architect views the catalog through a pattern selection lens.
+      Primary artefacts are the agent-patterns/ YAML files with their cognitive
+      architecture, use_cases, and antipatterns sections. They also reference the
+      orchestration-frameworks/ folder when designing multi-agent workflows.
+      The viewpoints/stakeholder-views.yaml file helps them understand which
+      patterns are appropriate for different stakeholder-driven requirements.
+    decisions:
+      - Which agent pattern best fits a given use case
+      - How to compose multiple patterns in a single solution
+      - Which orchestration framework suits the interaction model
+      - How to scope and decompose a multi-agent system
+      - What guardrails are required for a specific deployment
+    viewpoint_name: Pattern Selection View
+
+  PlatformEngineer:
+    stakeholder: Platform Engineer
+    role: >
+      The Platform Engineer builds and operates the agent platform infrastructure.
+      They manage agent deployment, monitoring, security boundaries, and runtime
+      operations. They are the first line of operational support for agent issues.
+    primary_concerns:
+      - Agent runtime operations and observability
+      - Security boundary enforcement and monitoring
+      - Rollback and recovery procedures
+      - Tool registry management and deployment
+      - Agent scaling and resource management
+    relevant_catalog_elements:
+      - Agent platform standard (runtime requirements, memory architecture, tool contracts)
+      - Agent security boundary specification (detailed enforcement mechanisms)
+      - Agent rollback policy (snapshot requirements, restore procedure, SLA)
+      - Agent guardrails specification (resource limits, behavioural anomaly detection)
+    information_view: >
+      The Platform Engineer views the catalog through an operational lens.
+      Key artefacts are the governance/ folder (policies they enforce) and
+      the security boundary specification (detailed enforcement mechanisms).
+      They care about: runtime_requirements, security_boundaries,
+      audit_and_compliance sections in the platform standard, and the
+      restore_procedure and chaos_testing sections of the rollback policy.
+    decisions:
+      - How to enforce security boundaries in the runtime environment
+      - How to configure and tune guardrail thresholds
+      - How to set up and validate rollback procedures
+      - How to monitor agent health and emit correct audit events
+      - How to handle specific operational scenarios (timeouts, OOM, tool failures)
+    viewpoint_name: Runtime Operations View
+
+cross_stakeholder_considerations:
+  governance_integration: >
+    All viewpoints share the governance folder as a common frame of reference.
+    The CTO sets governance policy direction, the Chief Architect ensures standards
+    support those policies, the Solutions Architect selects patterns that comply,
+    and the Platform Engineer enforces them at runtime.
+
+  traceability: >
+    Every catalog entry should be traceable to the concerns of at least one
+    stakeholder. When a new catalog entry is proposed, the submitter must
+    declare which stakeholder viewpoints it serves and how.
+
+  version_management: >
+    Viewpoints are versioned alongside the catalog. When a viewpoint changes
+    (e.g., new stakeholder concern or decision added), the viewpoints file
+    version is incremented and a changelog entry is required.
+
+relationships:
+  - source_id: dea:viewpoints-stakeholder
+    target_id: dea:policy-agent-audit
+    relationship_type: referenced_by
+  - source_id: dea:viewpoints-stakeholder
+    target_id: dea:agent-platform-standard
+    relationship_type: referenced_by
+  - source_id: dea:viewpoints-stakeholder
+    target_id: dea:agent-pattern-react
+    relationship_type: referenced_by
+tags:
+  - viewpoints
+  - stakeholders
+  - governance
+  - architecture
+  - operations

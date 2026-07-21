@@ -1,0 +1,162 @@
+id: dea:policy-agent-rollback
+name: Agent Rollback Policy
+version: "1.0.0"
+status: active
+description: >
+  Mandatory rollback policy for all production agents operating within the TechNeHub
+  Labs agent platform. This policy defines snapshot requirements, restore SLAs, and
+  the trigger conditions under which automatic or manual rollback must occur.
+
+policy_statements:
+  statement_1:
+    title: Session State Serialisability
+    requirement: >
+      Full agent session state must be serialisable at any point during execution.
+      Session state includes: current reasoning context, memory contents (short-term
+      and working memory), pending actions queue, tool call history, and any
+      intermediate outputs not yet returned to the caller. The serialised state
+      must be restorable without any loss of execution context.
+
+  statement_2:
+    title: Snapshot Requirements
+    requirement: >
+      Agents must produce checkpoints (snapshots) of their session state at the
+      following intervals:
+      - Time-based: At least every 5 minutes of active execution
+      - Action-based: After every N tool calls (configurable, default N=10)
+      - Decision-based: After any reasoning step that changes the agent's plan
+      - Event-based: Before and after any external system call or human interaction
+      Snapshots must be stored in encrypted, geographically redundant storage.
+
+  statement_3:
+    title: Restore SLA
+    requirement: >
+      Restore time from the most recent valid snapshot must not exceed 5 minutes
+      for any agent, regardless of agent complexity or session duration. This SLA
+      applies from the moment the rollback decision is made to the moment the
+      agent resumes processing. The platform must validate restore capability
+      via regular chaos testing.
+
+  statement_4:
+    title: Automatic Rollback Triggers
+    requirement: >
+      Automatic rollback MUST be triggered when any of the following conditions
+      are detected:
+      - LLM provider outage or API error that prevents continued reasoning
+      - Memory corruption detected via integrity check failure
+      - Tool registry inconsistency between agent's declared tools and platform registry
+      - Agent process crash or unexpected termination
+      - Security boundary violation detected (agent attempted out-of-bounds action)
+      - Resource exhaustion (memory, token budget, or tool call budget reached)
+
+  statement_5:
+    title: Manual Rollback Triggers
+    requirement: >
+      Manual rollback MAY be initiated by a platform operator or automated governance
+      system when:
+      - Agent output violates content guardrails on retry
+      - Agent enters an unintended infinite loop or repetitive behaviour
+      - Human reviewer determines agent has reached an undesirable state
+      - Compliance officer requires reset for audit purposes
+
+  statement_6:
+    title: Rollback Scope
+    requirement: >
+      Rollback restores the agent to the state at the most recent valid snapshot.
+      Any actions taken by the agent after that snapshot are discarded. Caller
+      state (the user prompt or external system that invoked the agent) is
+      unaffected. The caller receives an error indicating rollback occurred and
+      may retry the request.
+
+  statement_7:
+    title: Rollback Notification
+    requirement: >
+      Upon any rollback (automatic or manual), the following must occur:
+      - Caller notified with error code and rollback reason
+      - Audit log entry created with event type=rollback
+      - Platform engineering team alerted for automatic rollbacks
+      - Incident record created for manual rollbacks
+
+snapshot_schema:
+  version: "1.0"
+  fields:
+    - name: snapshot_id
+      type: string
+      required: true
+      description: Globally unique snapshot identifier
+    - name: agent_id
+      type: string
+      required: true
+      description: Agent this snapshot belongs to
+    - name: session_id
+      type: string
+      required: true
+      description: Session this snapshot belongs to
+    - name: snapshot_timestamp
+      type: datetime
+      required: true
+      description: When the snapshot was taken
+    - name: snapshot_reason
+      type: enum
+      required: true
+      enum_values:
+        - time_based
+        - action_based
+        - decision_based
+        - event_based
+        - pre_external_call
+        - manual
+    - name: serialised_state
+      type: object
+      required: true
+      description: Complete agent session state
+    - name: state_hash
+      type: string
+      required: true
+      description: SHA-256 hash of serialised state for integrity verification
+    - name: previous_snapshot_id
+      type: string
+      required: false
+      description: Chain link to previous snapshot for incremental restore
+
+restore_procedure:
+  steps:
+    - step: 1
+      action: Identify most recent valid snapshot for session
+      verification: Verify state_hash integrity before proceeding
+    - step: 2
+      action: Deserialize state into new agent process
+      verification: Validate deserialised state schema matches expected format
+    - step: 3
+      action: Reinitialise agent tool registry and memory from snapshot
+      verification: Confirm all tool references resolve to current registry
+    - step: 4
+      action: Resume agent from deserialised state
+      verification: Agent emits heartbeat event confirming healthy restart
+    - step: 5
+      action: Notify caller of successful restore
+      verification: Caller receives restore confirmation with new execution context
+  maximum_duration: 5 minutes end-to-end
+
+chaos_testing:
+  frequency: Weekly
+  scenarios:
+    - LLM provider simulated outage mid-session
+    - Memory corruption injection
+    - Tool registry inconsistency injection
+    - Agent process kill and restart
+  success_criteria: All scenarios restore within 5-minute SLA with zero data loss
+
+relationships:
+  - source_id: dea:policy-agent-rollback
+    target_id: dea:agent-platform-standard
+    relationship_type: required_by
+  - source_id: dea:policy-agent-rollback
+    target_id: dea:policy-agent-audit
+    relationship_type: depends_on
+tags:
+  - governance
+  - policy
+  - rollback
+  - resilience
+  - recovery

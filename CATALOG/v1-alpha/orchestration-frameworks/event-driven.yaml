@@ -1,0 +1,138 @@
+id: dea:orchestration-event-driven
+name: Event-Driven Orchestration Framework
+version: "1.0.0"
+status: active
+description: >
+  Event-driven orchestration pattern where agents react to events published on a
+  message bus. Rather than direct task dispatch, agents subscribe to event topics
+  and perform actions based on events they receive. This pattern decouples producers
+  from consumers, enables reactive workflows, and supports loose coupling across
+  distributed enterprise systems.
+
+orchestration_model:
+  type: event-driven
+  components:
+    - component: Event Bus
+      description: Central publish-subscribe infrastructure for event routing
+    - component: Event Schema Registry
+      description: Versioned schemas for all event types to ensure interoperability
+    - component: Agent Subscriptions
+      description: Each agent declares which event topics it subscribes to
+    - component: Event Router
+      description: Routes events to appropriate subscribers based on topic and filter rules
+
+event_model:
+  event_structure:
+    - field: event_id
+      type: string
+      description: Globally unique event identifier (UUID)
+    - field: event_type
+      type: string
+      description: Semantic event type (e.g., customer.order.placed)
+    - field: event_version
+      type: string
+      description: Schema version for compatibility tracking
+    - field: source
+      type: string
+      description: Originating service or agent ID
+    - field: timestamp
+      type: datetime
+      description: ISO 8601 event creation timestamp
+    - field: correlation_id
+      type: string
+      description: Groups related events across the same workflow
+    - field: payload
+      type: object
+      description: Event-specific data; schema defined in event schema registry
+    - field: metadata
+      type: object
+      description: Tracing, compliance, and routing metadata
+
+  event_categories:
+    - category: Command Events
+      description: Intent to perform an action; implies exactly-one delivery
+      examples:
+        - agent.task.execute
+        - workflow.step.advance
+        - approval.request
+    - category: Query Events
+      description: Request for information; implies request-reply pattern
+      examples:
+        - agent.status.request
+        - catalog.product.query
+    - category: Notification Events
+      description: Informational events; at-least-once delivery is acceptable
+      examples:
+        - customer.order.shipped
+        - agent.task.completed
+        - system.health.changed
+    - category: Signal Events
+      description: Control flow signals between agents or workflows
+      examples:
+        - workflow.pause
+        - escalation.required
+        - session.timeout
+
+subscription_model:
+  subscription_declaration:
+    topic_patterns: List of topic names or wildcard patterns the agent subscribes to
+    filter_rules: Optional filter expressions to select subset of events on a topic
+    delivery_semantics: At-least-once (default) or exactly-once per event type
+    acknowledgement: Whether agent must acknowledge event receipt
+
+  routing_rules:
+    - rule: Topic-based routing
+      description: Events routed by exact topic match
+      example: customer.order.* → all order-related agents
+    - rule: Content-based routing
+      description: Events routed by payload content values
+      example: payload.region == "EMEA" → EMEA specialist agents
+    - rule: Header-based routing
+      description: Events routed by metadata headers
+      example: metadata.priority == "high" → high-priority handler agents
+
+agent_behaviour:
+  event_handling:
+    receipt: Agent receives event from bus and deserialises using schema registry
+    processing: "Agent processes event and decides: act, pass, or escalate"
+    response: Agent may publish response events (command, query reply, or notification)
+    acknowledgement: Agent acknowledges event to bus if delivery_semantics requires it
+
+  non_functional_requirements:
+    latency: Event processing should complete within SLA per event type (typically < 5s)
+    throughput: Agent must handle peak event rate without message loss
+    ordering: Events with same correlation_id must be processed in timestamp order
+    idempotency: Agents must handle duplicate event delivery idempotently
+    observability: Agent must emit processing metrics and structured logs per event
+
+error_handling:
+  dead_letter_queue: Events that fail processing after max retries routed to DLQ
+  retry_policy: Exponential backoff with jitter; max retries per event type
+  escalation: Persistent failures after retries escalate to human review
+  circuit_breaker: Agent subscription suspended if error rate exceeds threshold
+
+use_cases:
+  - Reactive customer journey automation (order placed → inventory check → fulfilment routing)
+  - Real-time monitoring and alerting workflows
+  - Cross-domain data synchronisation across enterprise systems
+  - Event-sourced business process orchestration
+
+technology_stack:
+  - Event bus: Apache Kafka / AWS EventBridge / Azure Event Grid
+  - Schema registry: Confluent Schema Registry / AWS Glue Schema Registry
+  - Service mesh: Istio for mTLS and traffic management between agents
+  - Observability: OpenTelemetry for distributed tracing; Prometheus + Grafana for metrics
+
+relationships:
+  - source_id: dea:orchestration-event-driven
+    target_id: dea:agent-platform-standard
+    relationship_type: requires
+  - source_id: dea:orchestration-event-driven
+    target_id: dea:pattern-cqrs
+    relationship_type: implements
+tags:
+  - orchestration
+  - event-driven
+  - multi-agent
+  - framework
+  - reactive

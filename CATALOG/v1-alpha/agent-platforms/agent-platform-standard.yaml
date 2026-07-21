@@ -1,0 +1,43 @@
+id: dea:agent-platform-standard
+name: Enterprise Agent Platform Specification
+version: "1.0.0"
+status: active
+
+runtime_requirements:
+  isolation: Each agent runs in an isolated process/container with resource limits
+  memory_per_agent: Minimum 512MB RAM, recommended 2GB
+  tool_access: Agents may only call tools in the approved tool registry
+  network: Egress restricted to approved endpoints; no direct internet for reasoning agents
+  storage: Agent state persisted to encrypted store between invocations
+
+security_boundaries:
+  - Agents cannot modify their own runtime configuration
+  - Agents cannot spawn sub-processes or shell commands
+  - Agents cannot access secrets directly — must use secret-vault integration
+  - Agent actions are logged to immutable audit trail
+  - All agent outputs to users are filtered through output guardrails
+
+memory_architecture:
+  short_term: Turn context window (managed by LLM provider)
+  long_term: Vector store with semantic search (approved vendors)
+  working_memory: Ephemeral scratch space, cleared between sessions
+
+tool_use_contract:
+  - All tools declared in agent system prompt at initialisation
+  - Tool schemas published to agent tool registry
+  - Tool execution results returned as structured observations
+  - No dynamic tool discovery at runtime
+
+audit_and_compliance:
+  - Every agent action logged: timestamp, agent_id, action, target, result
+  - Audit logs retained for minimum 7 years (regulated environments)
+  - Rollback: full session state serialisable and restorable within 5 minutes
+
+relationships:
+  - source_id: dea:agent-platform-standard
+    target_id: dea:principle-secure-by-default
+    relationship_type: implements
+tags:
+  - agent-platform
+  - enterprise
+  - specification

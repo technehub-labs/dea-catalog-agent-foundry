@@ -1,0 +1,53 @@
+catalog_version: v1-alpha
+status: alpha
+release_date: "2026-01-15"
+description: >
+  Version 1-alpha of the Agent Foundry catalog. Contains agent patterns, agent
+  platform specifications, and orchestration framework definitions.
+
+entries:
+  agent_patterns:
+    - id: dea:agent-pattern-react
+      name: ReAct Agent Pattern
+      abbreviation: ReAct
+      file: agent-patterns/react.yaml
+    - id: dea:agent-pattern-plan-and-execute
+      name: Plan-and-Execute Agent Pattern
+      abbreviation: P&E
+      file: agent-patterns/plan-and-execute.yaml
+    - id: dea:agent-pattern-supervisor-worker
+      name: Supervisor-Worker Agent Pattern
+      abbreviation: SupWrk
+      file: agent-patterns/supervisor-worker.yaml
+    - id: dea:agent-pattern-debate
+      name: Multi-Agent Debate Pattern
+      abbreviation: Debate
+      file: agent-patterns/debate.yaml
+    - id: dea:agent-pattern-reflect
+      name: Reflexion/Reflect Agent Pattern
+      abbreviation: Reflect
+      file: agent-patterns/reflect.yaml
+
+  agent_platforms:
+    - id: dea:agent-platform-standard
+      name: Enterprise Agent Platform Specification
+      file: agent-platforms/agent-platform-standard.yaml
+    - id: dea:agent-security-boundary
+      name: Agent Security Boundary Specification
+      file: agent-platforms/agent-security-boundary.yaml
+
+  orchestration_frameworks:
+    - id: dea:orchestration-hierarchical
+      name: Hierarchical Orchestration Framework
+      file: orchestration-frameworks/hierarchical.yaml
+    - id: dea:orchestration-market-based
+      name: Market-Based Orchestration Framework
+      file: orchestration-frameworks/market-based.yaml
+    - id: dea:orchestration-event-driven
+      name: Event-Driven Orchestration Framework
+      file: orchestration-frameworks/event-driven.yaml
+
+governance:
+  audit_policy: ../governance/agent-audit-policy.yaml
+  rollback_policy: ../governance/agent-rollback-policy.yaml
+  guardrails: ../governance/agent-guardrails.yaml

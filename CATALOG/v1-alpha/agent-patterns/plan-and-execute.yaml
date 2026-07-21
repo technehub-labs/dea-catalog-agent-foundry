@@ -1,0 +1,51 @@
+id: dea:agent-pattern-plan-and-execute
+type: SolutionComponent
+name: Plan-and-Execute Agent Pattern
+abbreviation: P&E
+version: "1.0.0"
+status: active
+description: >
+  Plan-and-Execute pattern where the agent first builds an explicit multi-step plan
+  and then executes each step sequentially. The planner component produces a structured
+  action sequence before any actions are taken, providing better long-horizon coherence
+  than purely reactive approaches.
+pattern_type: single-agent
+cognitive_architecture:
+  reasoning: Plan-and-Execute (explicit planning phase followed by execution phase)
+  memory: Short-term (plan context) + Long-term (vector store for retrieved knowledge)
+  planning: Explicit planner — produces ordered list of steps before execution
+  tools: Required (function calling interface)
+strengths:
+  - Strong long-horizon coherence across multiple steps
+  - Clear plan visibility before execution starts
+  - Better handling of complex, multi-step tasks
+  - Plan can be inspected and validated before execution
+weaknesses:
+  - Inflexible — difficult to adapt plan mid-execution without replanning
+  - Planner adds additional LLM call overhead
+  - Brittle if early steps fail — downstream steps may become invalid
+  - Less transparent than ReAct during execution
+use_cases:
+  - Complex data ETL pipelines requiring ordered transformations
+  - Multi-document summarisation with dependency ordering
+  - Automated testing and validation pipelines
+antipatterns:
+  - Highly dynamic environments requiring real-time replanning
+  - Tasks with ambiguous or changing goals
+  - Single-step or short-horizon tasks where planning overhead is unjustified
+technology_stack:
+  - LLM: GPT-4 or Claude 3+ with function calling and structured output
+  - Vector store: Pinecone / Weaviate / Chroma
+  - Framework: LangChain (Plan-and-Execute agents) / custom implementation
+relationships:
+  - source_id: dea:agent-pattern-plan-and-execute
+    target_id: dea:principle-predictable
+    relationship_type: implements
+  - source_id: dea:agent-pattern-plan-and-execute
+    target_id: dea:agent-pattern-react
+    relationship_type: complements
+tags:
+  - agent-pattern
+  - single-agent
+  - planning
+  - tool-use

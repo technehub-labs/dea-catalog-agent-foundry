@@ -1,0 +1,51 @@
+id: dea:agent-pattern-supervisor-worker
+type: SolutionComponent
+name: Supervisor-Worker Agent Pattern
+abbreviation: SupWrk
+version: "1.0.0"
+status: active
+description: >
+  Hierarchical task decomposition pattern where a supervisor agent routes tasks to
+  specialist worker agents. The supervisor maintains global context and decides
+  which worker to invoke for each sub-task. Workers execute independently and
+  return results to the supervisor for synthesis.
+pattern_type: multi-agent
+cognitive_architecture:
+  reasoning: Hierarchical — supervisor reasons about task decomposition; workers reason within their specialty domain
+  memory: Supervisor holds global context; workers hold local task memory
+  planning: Supervisor performs task decomposition and routing; workers perform local planning
+  tools: Workers expose domain-specific tool registries
+strengths:
+  - Scales to complex, multi-domain tasks via specialisation
+  - Supervisor provides coherent orchestration without being a bottleneck
+  - Worker autonomy enables parallel execution of independent sub-tasks
+  - Clear separation of concerns between generalist supervisor and specialist workers
+weaknesses:
+  - Supervisor can become a single point of failure and bottleneck
+  - Communication overhead between supervisor and workers
+  - Requires well-defined routing logic to avoid misrouted tasks
+  - Worker specialisation boundaries can be difficult to define upfront
+use_cases:
+  - Enterprise automation spanning multiple business domains (HR, finance, IT)
+  - Customer support with specialist handlers (billing, technical, returns)
+  - Research and data synthesis across multiple knowledge bases
+antipatterns:
+  - Tasks that don't decompose naturally into sub-tasks
+  - Simple single-step tasks where the supervisor overhead is unjustified
+  - Tightly coupled sub-tasks where parallelism provides no benefit
+technology_stack:
+  - LLM: GPT-4 or Claude 3+ with function calling (supervisor and workers)
+  - Message bus: Apache Kafka / AWS SQS for supervisor-worker communication
+  - Framework: LangChain agents / custom supervisor-worker implementation
+relationships:
+  - source_id: dea:agent-pattern-supervisor-worker
+    target_id: dea:pattern-cqrs
+    relationship_type: implements
+  - source_id: dea:agent-pattern-supervisor-worker
+    target_id: dea:orchestration-hierarchical
+    relationship_type: implements
+tags:
+  - agent-pattern
+  - multi-agent
+  - hierarchical
+  - supervisor-worker

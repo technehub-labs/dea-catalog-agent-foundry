@@ -1,0 +1,53 @@
+id: dea:agent-pattern-reflect
+type: SolutionComponent
+name: Reflexion/Reflect Agent Pattern
+abbreviation: Reflect
+version: "1.0.0"
+status: active
+description: >
+  Reflexion/Reflect pattern where an agent reviews its own past actions and the
+  outcomes of those actions, then uses that self-evaluation to revise its strategy
+  for subsequent steps. Unlike ReAct which reacts to environmental observations,
+  Reflect explicitly reasons about failures and successes to improve future behaviour.
+pattern_type: single-agent
+cognitive_architecture:
+  reasoning: Reflexion — self-evaluation loop between action, observation, and self-review
+  memory: Short-term (current episode) + Long-term (reflective memory of past episodes)
+  planning: None (reactive) but informed by self-reflective memory
+  tools: Required (function calling interface)
+strengths:
+  - Learns from past failures within a session
+  - Reduces hallucination and repetition errors
+  - Improves over multiple iterations without retraining
+  - Effective for long-horizon tasks where early mistakes compound
+weaknesses:
+  - Requires structured self-evaluation signal (success/failure feedback)
+  - Additional LLM calls for self-reflection add latency and cost
+  - Reflection quality depends on the agent's ability to accurately evaluate itself
+  - Not suitable for tasks without feedback signals
+use_cases:
+  - Autonomous code generation with test-driven feedback loops
+  - Iterative text editing with human or automated feedback
+  - Exploratory data analysis with progressive refinement
+  - Research agent that tries, evaluates, and revises approaches
+antipatterns:
+  - Tasks without clear success/failure signals
+  - Single-step tasks where reflection adds no value
+  - Real-time systems requiring minimal latency
+technology_stack:
+  - LLM: GPT-4 or Claude 3+ with function calling
+  - Feedback source: unit tests, human feedback, external validators
+  - Framework: custom Reflect loop implementation or LangChain
+relationships:
+  - source_id: dea:agent-pattern-reflect
+    target_id: dea:agent-pattern-react
+    relationship_type: extends
+  - source_id: dea:agent-pattern-reflect
+    target_id: dea:principle-observable
+    relationship_type: implements
+tags:
+  - agent-pattern
+  - single-agent
+  - self-reflection
+  - iterative
+  - tool-use
